@@ -24,6 +24,6 @@ public class CameraPitchController : MonoBehaviour {
         Vector3 localEuler = freeLookCamera.transform.localEulerAngles;
         freeLookCamera.transform.localRotation = Quaternion.Euler(currentPitch, localEuler.y, localEuler.z);
 
-        Debug.Log("CameraPitchController - Current Pitch: " + currentPitch);
+        
     }
 }
