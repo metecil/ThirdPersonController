@@ -10,26 +10,25 @@ public class PlayerController : MonoBehaviour {
     public float gravity = -9.81f;
     private float verticalVelocity = 0f;
     
-    // Optional: camera target for your Cinemachine camera
+    // Camera target for your Cinemachine camera
     public Transform cameraTarget;
 
     void Update() {
         // --- Horizontal Movement ---
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
-        Vector3 moveDirection = transform.forward * verticalInput + transform.right * horizontalInput;
-        moveDirection *= moveSpeed;
+        Vector3 moveDirection = (transform.forward * verticalInput + transform.right * horizontalInput) * moveSpeed;
         
         // --- Jumping & Gravity ---
         if (controller.isGrounded) {
-            // If grounded and jump button pressed, set upward velocity
+            // Apply a small negative force to keep the controller grounded reliably.
+            if (verticalVelocity < 0)
+                verticalVelocity = -2f;
+            
             if (Input.GetButtonDown("Jump")) {
                 verticalVelocity = jumpForce;
-            } else {
-                verticalVelocity = 0f;
             }
         } else {
-            // Apply gravity over time if airborne
             verticalVelocity += gravity * Time.deltaTime;
         }
         
@@ -40,16 +39,18 @@ public class PlayerController : MonoBehaviour {
         // --- Player Rotation (Horizontal) ---
         float mouseX = Input.GetAxis("Mouse X");
         transform.Rotate(0, mouseX * rotationSpeed * Time.deltaTime, 0);
-        
-        // --- Update Camera Target (if used) ---
+    }
+    
+    void LateUpdate() {
+        // --- Update Camera Target in LateUpdate ---
         if (cameraTarget != null) {
             cameraTarget.position = transform.position;
-            // Keep camera target's rotation aligned with the player (only yaw)
+            // Force the camera target's rotation to match the player's yaw.
             cameraTarget.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
         }
     }
     
-    // (Optional) Debug callback to check ground contacts with the CharacterController.
+    // (Optional) Debug callback to log collisions with ground objects.
     void OnControllerColliderHit(ControllerColliderHit hit) {
         if (hit.gameObject.CompareTag("Ground")) {
             Debug.Log("Player hit ground: " + hit.gameObject.name);
